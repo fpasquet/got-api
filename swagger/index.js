@@ -15,9 +15,9 @@ const options = {
         description: "Dev server (uses test data)"
       },
       {
-        url: "url/api",
+        url: "https://game-of-throne-api.appspot.com/api",
         description: "Sandbox server (uses test data)"
-      }
+      },
     ],
     components
   },

@@ -8,8 +8,9 @@ const api = require("./api");
 const PORT = process.env.PORT || 8080;
 const app = express();
 
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api", api(express.Router()));
+app.use("/", swaggerUi.serve);
+app.get("/", swaggerUi.setup(swaggerSpec));
 
 const createServerInfo = server => {
   let serverInfo = ({ address, port } = server.address());

@@ -14,3 +14,9 @@ $ yarn scraping
 ```
 $ yarn start
 ```
+
+## Sandbox server
+
+Swagger: [https://game-of-throne-api.appspot.com](https://game-of-throne-api.appspot.com)
+
+API url: [https://game-of-throne-api.appspot.com/api](https://game-of-throne-api.appspot.com/api)
