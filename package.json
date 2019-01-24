@@ -1,0 +1,22 @@
+{
+  "name": "lagardedenuit",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon index.js",
+    "scraping": "node scripts/scraping"
+  },
+  "devDependencies": {
+    "axios": "^0.18.0",
+    "cheerio": "^1.0.0-rc.2",
+    "cli-progress": "^2.1.1"
+  },
+  "dependencies": {
+    "express": "^4.16.4",
+    "lodash": "^4.17.11",
+    "nodemon": "^1.18.9",
+    "swagger-jsdoc": "^3.2.6",
+    "swagger-ui-express": "^4.0.2"
+  }
+}

@@ -1,0 +1,31 @@
+paths:
+  /characters:
+    get:
+      summary: Get all characters
+      tags:
+        - Character
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Character"
+  /character/{key}:
+    get:
+      summary: Get character by key
+      tags:
+        - Character
+      parameters:
+      - in: path
+        name: key
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Character"
