@@ -4,11 +4,12 @@ const express = require("express");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger");
 const api = require("./api");
+const flatCacheMiddleware = require("./middlewares/flatCacheMiddleware");
 
 const PORT = process.env.PORT || 8080;
 const app = express();
 
-app.use("/api", api(express.Router()));
+app.use("/api", flatCacheMiddleware, api(express.Router()));
 app.use("/", swaggerUi.serve);
 app.get("/", swaggerUi.setup(swaggerSpec));
 
