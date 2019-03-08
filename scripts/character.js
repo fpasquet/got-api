@@ -1,4 +1,4 @@
-const { compact } = require("lodash");
+const { compact, reject, isEmpty } = require("lodash");
 const $ = require("cheerio");
 const { Scraping, generateKey } = require("./helper");
 
@@ -12,6 +12,10 @@ class Character {
   }
 
   setAttr(attrValue, attrName, isKey = false) {
+    let parent = this.html(`table.infobox th:contains("${attrValue}")`);
+    if (parent.text().trim() !== attrValue) {
+      return this;
+    }
     let el = this.html(`table.infobox th:contains("${attrValue}") + td a`);
     if (el.length > 0) {
       if (isKey) {
@@ -32,21 +36,31 @@ class Character {
     let els = this.html(`table.infobox th:contains("${attrValue}") + td`);
     if (els.length > 0) {
       if (isKey) {
-        this.attrs[attrName] = els.find("a").toArray().reduce((acc, el) => {
-          const href = generateKey($(el).attr("href"));
-          if (!href.match(/[\S\s]+#[\S\s]+|#[\S\s]+/)) {
-            acc.push(href);
-          }
-          return acc;
-        }, []);
+        this.attrs[attrName] = els
+          .find("a")
+          .toArray()
+          .reduce((acc, el) => {
+            const href = generateKey($(el).attr("href"));
+            if (!href.match(/[\S\s]+#[\S\s]+|#[\S\s]+/)) {
+              acc.push(href);
+            }
+            return acc;
+          }, []);
       } else {
-        this.attrs[attrName] = els.html().split("<br>").map(html =>
-          $(html)
-            .text()
-            .replace(/\[\d+\]/g, "")
-            .replace(/\([\S\s]+\)/g, "")
-            .replace(/[nN]one,/g, "")
-            .trim()
+        this.attrs[attrName] = reject(
+          els
+            .html()
+            .split(/<br>|\s\|\s/)
+            .map(html =>
+              $(html)
+                .text()
+                .replace(/\[\d+\]/g, "")
+                .replace(/\([\S\s]+\)/g, "")
+                .replace(/[nN]one,/g, "")
+                .replace(/([\w]+:)/g, "")
+                .trim()
+            ),
+          isEmpty
         );
       }
     }
@@ -131,28 +145,41 @@ class CharacterScraping extends Scraping {
   }
 
   async getCharacter(characterInfo) {
-    const $html = await this.getHtml(characterInfo.url);
+    const $html = await this.getHtmlByUrl(characterInfo.url);
     if (!$html) {
       return;
     }
 
     let character = new Character({ characterInfo, html: $html });
+    const name = $html("table.infobox caption")
+      .text()
+      .trim();
+    character.attrs.name =
+      name && character.attrs.name !== name ? name : character.attrs.name;
 
     character
       .initImage(this.endpoint_website)
       // .initBorn()
       // .initDeath()
+      .setAttr("Born", "born")
       .setAttr("Culture", "culture")
       .setAttr("Race", "race")
-      .setAttrs("Other Titles", "titles")
-      .setAttr("Royal House", "royalHouseKey", true)
-      .setAttrs("Allegiance", "allegiancesKey", true)
-      .setAttr("Father", "fatherKey", true)
-      .setAttr("Mother", "motherKey", true)
-      .setAttr("Spouse", "spouseKey", true)
-      .setAttr("Queen", "queenKey", true)
-      .setAttrs("Issue", "childrensKey", true)
-      .setAttrs("Heir", "heirsKey", true);
+      .setAttr("Full Name", "fullName")
+      .setAttrs("Title", "titles")
+      .setAttrs("Alias", "alias")
+      .setAttrs("Other Titles", "otherTitles")
+      .setAttr("Royal House", "royalHouses")
+      .setAttrs("Allegiance", "allegiances")
+      .setAttr("Father", "father")
+      .setAttr("Mother", "mother")
+      .setAttr("Spouse", "spouse")
+      .setAttrs("Consort", "consorts")
+      .setAttr("Queen", "queen")
+      .setAttrs("Issue", "issues")
+      .setAttrs("Heir", "heirs")
+      .setAttrs("Book", "books")
+      .setAttrs("Played by", "playedBy")
+      .setAttrs("TV series", "tvSeries");
 
     if (character.attrs.royalHouse) {
       character.attrs.royalHouse = character.attrs.royalHouse
@@ -176,16 +203,18 @@ class CharacterScraping extends Scraping {
   }
 
   async getCharacters() {
-    const $html = await this.getHtml("/index.php/List_of_characters");
+    const $html = await this.getHtmlByUrl("/index.php/List_of_characters");
 
-    const charactersInfo = $html(".mw-parser-output li").toArray().map(el => {
-      el = $(el).find("a:first-child");
-      return {
-        key: generateKey(el.attr("href")),
-        name: el.text(),
-        url: el.attr("href")
-      }
-    });
+    const charactersInfo = $html(".mw-parser-output li")
+      .toArray()
+      .map(el => {
+        el = $(el).find("a:first-child");
+        return {
+          key: generateKey(el.attr("href")),
+          name: el.text(),
+          url: el.attr("href")
+        };
+      });
 
     let characters = [];
     this.progress.start(charactersInfo.length, 0);

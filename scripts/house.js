@@ -70,7 +70,7 @@ class HouseScraping extends Scraping {
   }
 
   async getHouse(houseInfo) {
-    const $html = await this.getHtml(houseInfo.url);
+    const $html = await this.getHtmlByUrl(houseInfo.url);
 
     let house = new House({ houseInfo, html: $html });
 
@@ -92,7 +92,7 @@ class HouseScraping extends Scraping {
   }
 
   async getHouses() {
-    const $html = await this.getHtml("/index.php/Houses_of_Westeros");
+    const $html = await this.getHtmlByUrl("/index.php/Houses_of_Westeros");
 
     let housesInfo = [];
     let $liList = $html("#mw-content-text .navbox-list li").toArray();

@@ -1,4 +1,4 @@
-# API Game Of Throne
+# API Game Of Thrones
 
 Scraping data from the site https://awoiaf.westeros.org and expose to api
 
@@ -17,6 +17,6 @@ $ yarn start
 
 ## Sandbox server
 
-Swagger: [https://game-of-throne-api.appspot.com](https://game-of-throne-api.appspot.com)
+Swagger: [https://game-of-thrones-api.appspot.com](https://game-of-thrones-api.appspot.com)
 
-API url: [https://game-of-throne-api.appspot.com/api](https://game-of-throne-api.appspot.com/api)
+API url: [https://game-of-thrones-api.appspot.com/api](https://game-of-thrones-api.appspot.com/api)

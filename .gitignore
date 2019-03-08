@@ -2,3 +2,6 @@ node_modules
 yarn-error.lock
 
 data/*
+!data/.gitkeep
+temp/*
+!temp/.gitkeep
