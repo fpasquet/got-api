@@ -1,25 +1,36 @@
 const { compact, reject, isEmpty } = require("lodash");
 const $ = require("cheerio");
-const { Scraping, generateKey } = require("./helper");
+const { Scraping } = require("./helper");
 
 class Character {
   constructor({ characterInfo, html }) {
     this.attrs = {};
-    this.attrs.key = characterInfo.key;
     this.attrs.url = characterInfo.url;
     this.attrs.name = characterInfo.name;
     this.html = html;
   }
 
-  setAttr(attrValue, attrName, isKey = false) {
+  setAttr(attrValue, attrName, hasHref = false) {
     let parent = this.html(`table.infobox th:contains("${attrValue}")`);
     if (parent.text().trim() !== attrValue) {
       return this;
     }
     let el = this.html(`table.infobox th:contains("${attrValue}") + td a`);
     if (el.length > 0) {
-      if (isKey) {
-        this.attrs[attrName] = generateKey(el.attr("href"));
+      if (hasHref) {
+        const href = el.attr("href");
+        if (!href.match(/[\S\s]+#[\S\s]+|#[\S\s]+/)) {
+          this.attrs[attrName] = {
+            href,
+            value: el
+              .text()
+              .replace(/\[\d+\]/g, "")
+              .replace(/\([\S\s]+\)/g, "")
+              .replace(/[nN]one,/g, "")
+              .replace(/([\w]+:)/g, "")
+              .trim()
+          };
+        }
       } else {
         this.attrs[attrName] = el
           .text()
@@ -32,17 +43,26 @@ class Character {
     return this;
   }
 
-  setAttrs(attrValue, attrName, isKey = false) {
+  setAttrs(attrValue, attrName, hasHref = false) {
     let els = this.html(`table.infobox th:contains("${attrValue}") + td`);
     if (els.length > 0) {
-      if (isKey) {
+      if (hasHref) {
         this.attrs[attrName] = els
           .find("a")
           .toArray()
           .reduce((acc, el) => {
-            const href = generateKey($(el).attr("href"));
+            const href = $(el).attr("href");
             if (!href.match(/[\S\s]+#[\S\s]+|#[\S\s]+/)) {
-              acc.push(href);
+              acc.push({
+                href,
+                value: $(el)
+                  .text()
+                  .replace(/\[\d+\]/g, "")
+                  .replace(/\([\S\s]+\)/g, "")
+                  .replace(/[nN]one,/g, "")
+                  .replace(/([\w]+:)/g, "")
+                  .trim()
+              });
             }
             return acc;
           }, []);
@@ -161,43 +181,42 @@ class CharacterScraping extends Scraping {
       .initImage(this.endpoint_website)
       // .initBorn()
       // .initDeath()
-      .setAttr("Born", "born")
-      .setAttr("Culture", "culture")
-      .setAttr("Race", "race")
+      .setAttr("Culture", "culture", true)
+      .setAttr("Race", "race", true)
       .setAttr("Full Name", "fullName")
       .setAttrs("Title", "titles")
       .setAttrs("Alias", "alias")
       .setAttrs("Other Titles", "otherTitles")
-      .setAttr("Royal House", "royalHouses")
-      .setAttrs("Allegiance", "allegiances")
-      .setAttr("Father", "father")
-      .setAttr("Mother", "mother")
-      .setAttr("Spouse", "spouse")
-      .setAttrs("Consort", "consorts")
-      .setAttr("Queen", "queen")
-      .setAttrs("Issue", "issues")
-      .setAttrs("Heir", "heirs")
+      .setAttr("Royal House", "royalHouses", true)
+      .setAttrs("Allegiance", "allegiances", true)
+      .setAttr("Father", "father", true)
+      .setAttr("Mother", "mother", true)
+      .setAttr("Spouse", "spouse", true)
+      .setAttrs("Consort", "consorts", true)
+      .setAttr("Queen", "queen", true)
+      .setAttrs("Issue", "issues", true)
+      .setAttrs("Heir", "heirs", true)
       .setAttrs("Book", "books")
       .setAttrs("Played by", "playedBy")
       .setAttrs("TV series", "tvSeries");
 
-    if (character.attrs.royalHouse) {
-      character.attrs.royalHouse = character.attrs.royalHouse
-        .replace("House", "")
-        .trim();
-    }
+    // if (character.attrs.royalHouse) {
+    //   character.attrs.royalHouse = character.attrs.royalHouse
+    //     .replace("House", "")
+    //     .trim();
+    // }
 
-    if (character.attrs.spouse) {
-      character.attrs.spouse = character.attrs.spouse
-        .replace("House", "")
-        .trim();
-    }
+    // if (character.attrs.spouse) {
+    //   character.attrs.spouse = character.attrs.spouse
+    //     .replace("House", "")
+    //     .trim();
+    // }
 
-    if (character.attrs.allegiances) {
-      character.attrs.allegiances = character.attrs.allegiances.map(
-        allegiance => allegiance.replace("House", "").trim()
-      );
-    }
+    // if (character.attrs.allegiances) {
+    //   character.attrs.allegiances = character.attrs.allegiances.map(
+    //     allegiance => allegiance.replace("House", "").trim()
+    //   );
+    // }
 
     return character.attrs;
   }
@@ -210,7 +229,6 @@ class CharacterScraping extends Scraping {
       .map(el => {
         el = $(el).find("a:first-child");
         return {
-          key: generateKey(el.attr("href")),
           name: el.text(),
           url: el.attr("href")
         };

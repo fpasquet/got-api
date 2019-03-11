@@ -9,7 +9,7 @@ const flatCacheMiddleware = require("./middlewares/flatCacheMiddleware");
 const PORT = process.env.PORT || 8080;
 const app = express();
 
-app.use("/api", flatCacheMiddleware, api(express.Router()));
+app.use("/api", api(express.Router()));
 app.use("/", swaggerUi.serve);
 app.get("/", swaggerUi.setup(swaggerSpec));
 
