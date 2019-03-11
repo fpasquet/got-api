@@ -21,15 +21,15 @@ const Character = {
       region: {
         type: "string"
       },
-      lordKey: {
-        description: "This key character's lord.",
-        type: "string"
+      lord: {
+        description: "This character's lord.",
+        $ref: "#/components/schemas/Character"
       },
       heirsKey: {
-        description: "This keys character's heirs.",
+        description: "This character's heirs.",
         type: "array",
         items: {
-          type: "string"
+          $ref: "#/components/schemas/Character"
         }
       },
     }

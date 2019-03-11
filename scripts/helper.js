@@ -56,9 +56,19 @@ class Scraping {
 
 const generateKey = value => Buffer.from(value).toString("base64");
 const decodeKey = key => Buffer.from(key, "base64").toString("ascii");
+const clearStringToElement = el => {
+  return el
+    .text()
+    .replace(/\[\d+\]/g, "")
+    .replace(/\([\S\s]+\)/g, "")
+    .replace(/[nN]one,/g, "")
+    .replace(/([\w]+:)/g, "")
+    .trim();
+}
 
 module.exports = {
   Scraping,
   generateKey,
-  decodeKey
+  decodeKey,
+  clearStringToElement,
 };

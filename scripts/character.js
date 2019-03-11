@@ -1,10 +1,12 @@
 const { compact, reject, isEmpty } = require("lodash");
 const $ = require("cheerio");
-const { Scraping } = require("./helper");
+const { Scraping, clearStringToElement } = require("./helper");
+const uniqid = require('uniqid');
 
 class Character {
   constructor({ characterInfo, html }) {
     this.attrs = {};
+    this.attrs.key = uniqid();
     this.attrs.url = characterInfo.url;
     this.attrs.name = characterInfo.name;
     this.html = html;
@@ -22,13 +24,7 @@ class Character {
         if (!href.match(/[\S\s]+#[\S\s]+|#[\S\s]+/)) {
           this.attrs[attrName] = {
             href,
-            value: el
-              .text()
-              .replace(/\[\d+\]/g, "")
-              .replace(/\([\S\s]+\)/g, "")
-              .replace(/[nN]one,/g, "")
-              .replace(/([\w]+:)/g, "")
-              .trim()
+            value: clearStringToElement(el)
           };
         }
       } else {
@@ -55,13 +51,7 @@ class Character {
             if (!href.match(/[\S\s]+#[\S\s]+|#[\S\s]+/)) {
               acc.push({
                 href,
-                value: $(el)
-                  .text()
-                  .replace(/\[\d+\]/g, "")
-                  .replace(/\([\S\s]+\)/g, "")
-                  .replace(/[nN]one,/g, "")
-                  .replace(/([\w]+:)/g, "")
-                  .trim()
+                value: clearStringToElement($(el))
               });
             }
             return acc;
@@ -71,15 +61,7 @@ class Character {
           els
             .html()
             .split(/<br>|\s\|\s/)
-            .map(html =>
-              $(html)
-                .text()
-                .replace(/\[\d+\]/g, "")
-                .replace(/\([\S\s]+\)/g, "")
-                .replace(/[nN]one,/g, "")
-                .replace(/([\w]+:)/g, "")
-                .trim()
-            ),
+            .map(html => clearStringToElement($(html))),
           isEmpty
         );
       }
@@ -187,7 +169,7 @@ class CharacterScraping extends Scraping {
       .setAttrs("Title", "titles")
       .setAttrs("Alias", "alias")
       .setAttrs("Other Titles", "otherTitles")
-      .setAttr("Royal House", "royalHouses", true)
+      .setAttr("Royal House", "royalHouse", true)
       .setAttrs("Allegiance", "allegiances", true)
       .setAttr("Father", "father", true)
       .setAttr("Mother", "mother", true)

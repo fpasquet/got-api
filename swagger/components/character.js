@@ -21,45 +21,78 @@ const Character = {
         type: "string"
       }
     },
-    royalHouseKey: {
-      description: "This key house's royal house.",
-      type: "string"
+    royalHouse: {
+      description: "This house's royal house.",
+      $ref: "#/components/schemas/House"
     },
-    allegiancesKey: {
-      description: "This keys house's allegiances.",
+    allegiances: {
+      description: "This house's allegiances.",
       type: "array",
       items: {
-        type: "string"
+        $ref: "#/components/schemas/House"
       }
     },
-    fatherKey: {
-      description: "This key character's father.",
-      type: "string"
-    },
-    motherKey: {
-      description: "This key character's mother.",
-      type: "string"
-    },
-    spouseKey: {
-      description: "This key character's spouse.",
-      type: "string"
-    },
-    queenKey: {
-      description: "This key character's queen.",
-      type: "string"
-    },
-    childrensKey: {
-      description: "This keys character's childrens.",
-      type: "array",
-      items: {
-        type: "string"
+    father: {
+      description: "This character's father.",
+      type: "object",
+      properties: {
+        key: {
+          type: "string"
+        },
+        name: {
+          type: "string"
+        },
+        imageUrl: {
+          type: "string"
+        }
       }
     },
-    heirsKey: {
-      description: "This keys character's heirs.",
+    mother: {
+      description: "This character's mother.",
+      type: "object",
+      properties: {
+        key: {
+          type: "string"
+        },
+        name: {
+          type: "string"
+        },
+        imageUrl: {
+          type: "string"
+        }
+      }
+    },
+    spouse: {
+      description: "This character's spouse.",
+      type: "object",
+      properties: {
+        key: {
+          type: "string"
+        },
+        name: {
+          type: "string"
+        },
+        imageUrl: {
+          type: "string"
+        }
+      }
+    },
+    childrens: {
+      description: "This character's childrens.",
       type: "array",
       items: {
-        type: "string"
+        type: "object",
+        properties: {
+          key: {
+            type: "string"
+          },
+          name: {
+            type: "string"
+          },
+          imageUrl: {
+            type: "string"
+          }
+        }
       }
     },
   }
