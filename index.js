@@ -33,3 +33,5 @@ const server = app.listen(PORT, () => {
   const serverInfo = createServerInfo(server);
   console.log(`🚀 Server ready at ${serverInfo.url}`);
 });
+
+module.exports = server;

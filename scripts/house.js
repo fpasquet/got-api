@@ -1,68 +1,8 @@
 const { compact } = require("lodash");
 const $ = require("cheerio");
+const { Scraping, Model, generateKey } = require("./helper");
 
-const { Scraping, generateKey } = require("./helper");
-
-class House {
-  constructor({ houseInfo, html }) {
-    this.attrs = {};
-    this.attrs.key = houseInfo.key;
-    this.attrs.name = houseInfo.name;
-    this.attrs.url = houseInfo.url;
-    this.html = html;
-  }
-
-  initImage(websiteUrl) {
-    let imageUrl = this.html("table.infobox .infobox-image img").attr("src");
-    if (imageUrl) {
-      this.attrs.imageUrl = `${websiteUrl}${imageUrl}`;
-    }
-    return this;
-  }
-
-  setAttr(attrValue, attrName, isKey = false) {
-    let el = this.html(`table.infobox th:contains("${attrValue}") + td a`);
-    if (el.length > 0) {
-      if (isKey) {
-        this.attrs[attrName] = generateKey(el.attr("href"));
-      } else {
-        this.attrs[attrName] = el
-          .text()
-          .replace(/\[\d+\]/g, "")
-          .replace(/\([\S\s]+\)/g, "")
-          .replace(/[nN]one,/g, "")
-          .trim();
-      }
-    }
-    return this;
-  }
-
-  setAttrs(attrValue, attrName, isKey = false) {
-    let els = this.html(`table.infobox th:contains("${attrValue}") + td`);
-    if (els.length > 0) {
-      if (isKey) {
-        this.attrs[attrName] = els.find("a").toArray().reduce((acc, el) => {
-          const href = generateKey($(el).attr("href"));
-          if (!href.match(/[\S\s]+#[\S\s]+|#[\S\s]+/)) {
-            acc.push(href);
-          }
-          return acc;
-        }, []);
-      } else {
-        this.attrs[attrName] = els.html().split("<br>").map(html =>
-          $(html)
-            .text()
-            .replace(/\[\d+\]/g, "")
-            .replace(/\([\S\s]+\)/g, "")
-            .replace(/[nN]one,/g, "")
-            .trim()
-        );
-      }
-    }
-
-    return this;
-  }
-}
+class House extends Model {}
 
 class HouseScraping extends Scraping {
   constructor() {
@@ -72,16 +12,16 @@ class HouseScraping extends Scraping {
   async getHouse(houseInfo) {
     const $html = await this.getHtmlByUrl(houseInfo.url);
 
-    let house = new House({ houseInfo, html: $html });
+    let house = new House({ info: houseInfo, html: $html });
 
     house
       .initImage(this.endpoint_website)
       .setAttrs("Seat", "seats")
-      .setAttr("Founder", "founder")
+      .setAttr("Founder", "founder", true)
       .setAttr("Founded", "founded")
       .setAttr("Region", "region")
-      .setAttr("Lord", "lordKey", true)
-      .setAttrs("Heir", "heirsKey", true);
+      .setAttr("Lord", "lord", true)
+      .setAttrs("Heir", "heirs", true);
     // .setAttr("Coat of arms", "coatOfArms", false)
     // .setAttr("Words", "words", false)
     // .setAttrs("Cadet Branch", "cadetBranches")

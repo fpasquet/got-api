@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "name": "game-of-thrones-api",
+  "alias": "game-of-thrones-api",
+  "builds": [
+    { "src": "data/*.json", "use": "@now/static" },
+    { "src": "index.js", "use": "@now/node" }
+  ],
+  "routes": [
+    { "src": "/data/characters.json", "dest": "/data/characters.json" },
+    { "src": "/data/houses.json", "dest": "/data/houses.json" },
+    { "src": "/(.*)", "dest": "index.js" }
+  ]
+}

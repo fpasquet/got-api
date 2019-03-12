@@ -1,82 +1,8 @@
-const { compact, reject, isEmpty } = require("lodash");
+const { compact } = require("lodash");
 const $ = require("cheerio");
-const { Scraping, clearStringToElement } = require("./helper");
-const uniqid = require('uniqid');
+const { Scraping, Model } = require("./helper");
 
-class Character {
-  constructor({ characterInfo, html }) {
-    this.attrs = {};
-    this.attrs.key = uniqid();
-    this.attrs.url = characterInfo.url;
-    this.attrs.name = characterInfo.name;
-    this.html = html;
-  }
-
-  setAttr(attrValue, attrName, hasHref = false) {
-    let parent = this.html(`table.infobox th:contains("${attrValue}")`);
-    if (parent.text().trim() !== attrValue) {
-      return this;
-    }
-    let el = this.html(`table.infobox th:contains("${attrValue}") + td a`);
-    if (el.length > 0) {
-      if (hasHref) {
-        const href = el.attr("href");
-        if (!href.match(/[\S\s]+#[\S\s]+|#[\S\s]+/)) {
-          this.attrs[attrName] = {
-            href,
-            value: clearStringToElement(el)
-          };
-        }
-      } else {
-        this.attrs[attrName] = el
-          .text()
-          .replace(/\[\d+\]/g, "")
-          .replace(/\([\S\s]+\)/g, "")
-          .replace(/[nN]one,/g, "")
-          .trim();
-      }
-    }
-    return this;
-  }
-
-  setAttrs(attrValue, attrName, hasHref = false) {
-    let els = this.html(`table.infobox th:contains("${attrValue}") + td`);
-    if (els.length > 0) {
-      if (hasHref) {
-        this.attrs[attrName] = els
-          .find("a")
-          .toArray()
-          .reduce((acc, el) => {
-            const href = $(el).attr("href");
-            if (!href.match(/[\S\s]+#[\S\s]+|#[\S\s]+/)) {
-              acc.push({
-                href,
-                value: clearStringToElement($(el))
-              });
-            }
-            return acc;
-          }, []);
-      } else {
-        this.attrs[attrName] = reject(
-          els
-            .html()
-            .split(/<br>|\s\|\s/)
-            .map(html => clearStringToElement($(html))),
-          isEmpty
-        );
-      }
-    }
-
-    return this;
-  }
-
-  initImage(websiteUrl) {
-    let imageUrl = this.html("table.infobox .infobox-image img").attr("src");
-    if (imageUrl) {
-      this.attrs.imageUrl = `${websiteUrl}${imageUrl}`;
-    }
-    return this;
-  }
+class Character extends Model {
 
   initBorn() {
     let bornIn = this.html('table.infobox th:contains("Born in") + td')
@@ -152,7 +78,7 @@ class CharacterScraping extends Scraping {
       return;
     }
 
-    let character = new Character({ characterInfo, html: $html });
+    let character = new Character({ info: characterInfo, html: $html });
     const name = $html("table.infobox caption")
       .text()
       .trim();
