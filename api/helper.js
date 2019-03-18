@@ -5,10 +5,10 @@ const { pick } = require("lodash");
 const CharacterSchema = require("../swagger/components/character");
 const HouseSchema = require("../swagger/components/house");
 
-let characters = fs.readFileSync(path.resolve(__dirname, "/../data/characters.json"));
+let characters = fs.readFileSync(path.resolve(__dirname, "../data/characters.json"));
 characters = JSON.parse(characters);
 
-let houses = fs.readFileSync(path.resolve(__dirname, "/../data/houses.json"));
+let houses = fs.readFileSync(path.resolve(__dirname, "../data/houses.json"));
 houses = JSON.parse(houses);
 
 const characterProperties = Object.keys(CharacterSchema.properties).reduce(
@@ -54,56 +54,54 @@ const transformCharacter = character => {
     properties.race = race ? race.value : null;
   }
 
-  if (father) {
-    properties.father = pick(findCharacterByHref(father.href), [
-      "key",
-      "name",
-      "imageUrl"
-    ]);
-  } else {
-    const parents = characters.filter(currentCharacter => {
-      return (
-        currentCharacter.issues &&
-        currentCharacter.issues.find(child => child.href === character.url)
-      );
-    });
-  }
+  // if (father) {
+  //   properties.father = pick(findCharacterByHref(father.href), [
+  //     "key",
+  //     "name",
+  //     "imageUrl"
+  //   ]);
+  // } else {
+  //   const parents = characters.filter(currentCharacter => {
+  //     return (
+  //       currentCharacter.issues &&
+  //       currentCharacter.issues.find(child => child.href === character.url)
+  //     );
+  //   });
+  // }
 
-  if (mother) {
-    properties.mother = pick(findCharacterByHref(mother.href), [
-      "key",
-      "name",
-      "imageUrl"
-    ]);
-  }
+  // if (mother) {
+  //   properties.mother = pick(findCharacterByHref(mother.href), [
+  //     "key",
+  //     "name",
+  //     "imageUrl"
+  //   ]);
+  // }
 
-  if (spouse) {
-    properties.spouse = pick(findCharacterByHref(spouse.href), [
-      "key",
-      "name",
-      "imageUrl"
-    ]);
-  }
+  // if (spouse) {
+  //   properties.spouse = pick(findCharacterByHref(spouse.href), [
+  //     "key",
+  //     "name",
+  //     "imageUrl"
+  //   ]);
+  // }
 
   if (royalHouse) {
-    properties.royalHouse = pick(findHouseByHref(royalHouse.href), [
+    properties.house = pick(findHouseByHref(royalHouse.href), [
       "key",
       "name",
       "imageUrl"
     ]);
-  }
-
-  if (allegiances) {
-    properties.allegiances = allegiances.map(allegiance =>
+  } else if (allegiances) {
+    properties.house = allegiances.map(allegiance =>
       pick(findHouseByHref(allegiance.href), ["key", "name", "imageUrl"])
-    );
+    )[0];
   }
 
-  if (issues) {
-    properties.childrens = issues.map(child =>
-      pick(findCharacterByHref(child.href), ["key", "name", "imageUrl"])
-    );
-  }
+  // if (issues) {
+  //   properties.childrens = issues.map(child =>
+  //     pick(findCharacterByHref(child.href), ["key", "name", "imageUrl"])
+  //   );
+  // }
 
   return {
     ...characterProperties,
